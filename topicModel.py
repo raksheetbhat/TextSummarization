@@ -77,8 +77,8 @@ class TopicModel(object):
         list of dominant topic ids, in decreasing order of dominance
     '''
 
-    def __init__(self, num_topics=100, min_word_count=20, 
-                 top_most_common_words=10, min_doc_length=40, 
+    def __init__(self, num_topics=10, min_word_count=0, 
+                 top_most_common_words=0, min_doc_length=0, 
                  max_doc_length=1000, random_state=None):
         self.num_topics = num_topics
         self.min_word_count = min_word_count
@@ -181,7 +181,7 @@ class TopicModel(object):
                        of low frequency tokens
         """
         lowFreqTokens = set()
-        for token, freq in frequencies.iteritems():
+        for token, freq in frequencies.items():
             if freq <= countCutOff:
                 lowFreqTokens.add(token)
         return lowFreqTokens
@@ -234,27 +234,27 @@ class TopicModel(object):
         
         # calculate token frequencies to exclude low and high frequency tokens
         freqs = self.getFrequencies(tokens)
-        low_freq_tokens = set(x[0] for x in freqs.iteritems() if x[1] < min_word_count)
+        low_freq_tokens = set(x[0] for x in freqs.items() if x[1] < min_word_count)
         high_freq_tokens = [word[0] for word in freqs.most_common(top_most_common_words)]
         
         tokens =  [[t for t in tkn if t not in low_freq_tokens] for tkn in tokens]
         tokens =  [[t for t in tkn if t not in high_freq_tokens] for tkn in tokens]
         
-        print '\nnumber of low frequency tokens pruned = {:,d}'\
-              .format(len(low_freq_tokens))
-        print 'min_word_count = {:d}, top_most_common_words = {:,d}'\
-              .format(min_word_count, top_most_common_words)
-        print 'number of high frequency tokens pruned = {:,d}'\
-              .format(len(high_freq_tokens))
-        print 'tokens = {:,d} rows'.format(len(tokens))
-        print 'text pre-processing is complete\n'
+        print('\nnumber of low frequency tokens pruned = {:,d}'\
+              .format(len(low_freq_tokens)))
+        print('min_word_count = {:d}, top_most_common_words = {:,d}'\
+              .format(min_word_count, top_most_common_words))
+        print('number of high frequency tokens pruned = {:,d}'\
+              .format(len(high_freq_tokens)))
+        print('tokens = {:,d} rows'.format(len(tokens)))
+        print('text pre-processing is complete\n')
         return tokens
 
 
     def getLDA(self, dictionary=None, corpus=None, num_topics=None, 
                random_state=None):
         # get LDA for dictionary_all and corpus_all
-        print 'computing LDA...'
+        print('computing LDA...', corpus)
         
         if dictionary is None:
             dictionary = self.dictionary
@@ -262,6 +262,8 @@ class TopicModel(object):
             corpus = self.corpus
         if num_topics is None:
             num_topics = self.num_topics
+        
+        print('corpus', corpus)
         
         lda = models.ldamodel.LdaModel(corpus=corpus, 
                                        alpha='auto', 
@@ -273,7 +275,7 @@ class TopicModel(object):
 
     def getDominantTopics(self, corpus, lda, num_dominant_topics=None):
         
-        print 'computing dominant topics...'
+        print('computing dominant topics...')
         if corpus is None:
             corpus = self.corpus
         if lda is None:

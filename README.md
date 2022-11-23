@@ -28,10 +28,10 @@ Once the dominant topics have been identified, summaries are computed for provid
 
 ```python
 # generate and display the computed summary for each regulation
-for docket_id, document in regulations.iteritems():
+for docket_id, document in regulations.items():
     docSummaries = DocumentSummaries(topicModel, num_dominant_topics=3, number_of_sentences=4)
     docSummaries.summarize(document)
-    print docket_id
+    print(docket_id)
     docSummaries.display()
 ```
 The `DocumentSummaries.summarize` method performs the following steps to extract the sumaries for a given topic id :

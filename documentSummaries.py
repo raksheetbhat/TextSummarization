@@ -39,9 +39,9 @@ def innerProduct(bow1, bow2):
         inner_product += bow1[key] * bow2[key]
     sum1 = 0.0
     sum2 = 0.0
-    for v in bow1.itervalues():
+    for v in bow1.values():
         sum1 += v*v
-    for v in bow2.itervalues():
+    for v in bow2.values():
         sum2 += v*v
     inner_product /= np.sqrt(sum1 * sum2)
     return inner_product
@@ -155,6 +155,7 @@ class DocumentSummaries(object):
         # the 2nd element is a tuple of (topic_id, weight)
         distributions = list()
         get_bow = self.dictionary.doc2bow
+        print("ff", get_bow)
         get_document_topics = self.lda.get_document_topics
         for sentences in self.sentence_groups:
             sentence_distributions = list()
@@ -171,7 +172,7 @@ class DocumentSummaries(object):
                 # this is to get the dominant index only (not a list)
                 try:
                     dist = max(dist, key=lambda x: x[1])
-                except ValueError, ve:
+                except (ValueError, ve):
                     continue
                 sentence_distributions.append((k, dist))
             distributions.append(sentence_distributions)
@@ -183,6 +184,7 @@ class DocumentSummaries(object):
         results_per_docket = dict()
         results_per_docket['number_of_documents'] = len(self.sentence_groups)
         results_per_docket['dominant_topic_ids'] = self.dominant_topic_ids
+        print('res', results_per_docket)
         
         for dtid in self.dominant_topic_ids:
             results_per_topic = dict()
@@ -192,6 +194,8 @@ class DocumentSummaries(object):
             topic_terms = self.lda.show_topic(dtid)
             terms = [t[0] for t in topic_terms]
             weights = [w[1] for w in topic_terms]
+
+            print('top_sentences', top_sentences)
             
             ts = topicSummary(topic_id = dtid, terms=terms, 
                               weights=weights, sentences=top_sentences)
@@ -229,7 +233,7 @@ class DocumentSummaries(object):
             
             if len(sorted_by_weight) == 0:
                 if sn == len(self.distributions) - 1:
-                    print 'No results in filtered set for sentence:', sn
+                    print('No results in filtered set for sentence:', sn)
                 sn += 1
                 continue
             
@@ -255,44 +259,47 @@ class DocumentSummaries(object):
         #
         # the output is a list of triplets:
         # (document number, sentence number, weight)
+        print("d", self.distributions)
         filtered_by_topic_id = list()
         for k, distribution in enumerate(self.distributions):
             filtered = [d for d in distribution if d[1][0] == topic_id]
             for item in filtered:
                 filtered_by_topic_id.append((k, item[0], item[1][1]))
+        print('filtered_by_topic_id', filtered_by_topic_id)
         return filtered_by_topic_id
     
     
     def display(self):
         '''
         '''
-        print 'The dominant topics in descending order are:'
+        print('The dominant topics in descending order are:')
         for dtid in self.dominant_topic_ids:
-            print dtid, 
-        print ''
+            print(dtid) 
+        print('')
         
         for k in range(self.num_dominant_topics):
             dtid = self.dominant_topic_ids[k]
+            print("dtid", dtid)
             topicSummary = self.summary_data[dtid]
             terms = topicSummary.terms
             weights = topicSummary.weights
             num_terms = len(terms)
             sentences = topicSummary.sentences
             
-            print '\nTopic {:d}'.format(dtid)
-            print 'The top {:d} terms and corresponding weights are:'.format(num_terms)
+            print('\nTopic {:d}'.format(dtid))
+            print('The top {:d} terms and corresponding weights are:'.format(num_terms))
             for term, weight in zip(terms, weights):
-                print ' * {:s} ({:5.4f})'.format(term, weight)
+                print(' * {:s} ({:5.4f})'.format(term, weight))
             
-            print '\n\nThe selected sentences are:',
+            print('\n\nThe selected sentences are:')
             n_sentences = len(sentences)
             for j in range(n_sentences):
                 item = sentences[j]
-                print '{:d},'.format(item[0]),
-            print ' '
+                print('{:d},'.format(item[0]))
+            print(' ')
             for j in range(n_sentences):
                 item = sentences[j]
                 sentence = item[2]
-                print sentence
+                print(sentence)
             print
 
